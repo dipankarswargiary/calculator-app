@@ -21,6 +21,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
   ];
 
   String _displayNum = "0";
+  String _displayResult = "";
   bool _decimalPointUsed = false;
 
   bool isOperator(String text) {
@@ -37,7 +38,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
     if (num == '') return;
     
     setState(() {
-      if (num == "." && _decimalPointUsed) {
+      if (num == "." && (_decimalPointUsed || isOperator(_displayNum[(_displayNum.length - 1)]))) {
         return;
       } else if (_displayNum == "0" && num != ".") {
         _displayNum = num;
@@ -48,6 +49,25 @@ class _CalculatorPageState extends State<CalculatorPage> {
       if (num == ".") {
         _decimalPointUsed = true;
       }
+
+      // calculate the result
+      if (num != ".") {
+        _showResult();
+      }
+    });
+  }
+
+  void _operatorPressed(String op) {
+    String last = _displayNum[(_displayNum.length - 1)];
+    if (isOperator(last)) return;
+
+    setState(() {
+      if (last == '.') {
+        _displayNum = _displayNum.substring(0, _displayNum.length - 1);
+      }
+
+      _displayNum += op;
+      _decimalPointUsed = false;
     });
   }
 
@@ -60,13 +80,13 @@ class _CalculatorPageState extends State<CalculatorPage> {
         _deleteOp();
         break;
       case "=":
-        _calculate(_displayNum);
+        _equalOp();
         break;
       case "%":
-        // TODO: to be implemented % operator
+        _percentageOp();
         break;
       default:
-        // all other ops
+        _operatorPressed(op);
     }
   }
 
@@ -75,6 +95,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
   void _allClearOp() {
     setState(() {
       _displayNum = "0";
+      _displayResult = "";
       _decimalPointUsed = false;
     });
   }
@@ -92,16 +113,72 @@ class _CalculatorPageState extends State<CalculatorPage> {
       } else {
         _displayNum = "0";
       }
+      
+      _showResult();
     });
   }
 
-  void _calculate(String expStr) {
-    String exp = expStr
-      .replaceAll('X', '*')
-      .replaceAll('÷', '/');
+  void _percentageOp() {
+    setState(() {
+      double num = double.parse(_displayNum);
+      num /= 100;
+      _displayNum = num.toString();
+    });
+    
+    _showResult();
   }
 
+  void _equalOp() {
+    final String last = _displayNum[(_displayNum.length - 1)];
+    if (isOperator(last) || last == ".") {
+      _displayNum = _displayNum.substring(0, _displayNum.length - 1);
+    }
 
+    final result = _calculate();
+    List<String> segments = result.split('.');
+    setState(() {
+      _displayResult = "";
+      if (double.parse(result) == 0 && _displayNum == "0") {
+        _displayNum = "0";
+      } else if (segments[1] == "0") {
+        _displayNum = segments[0];
+      } else {
+        _displayNum = result;
+      }
+    });
+  }
+
+  void _showResult() {
+    final String result = _calculate();
+    List<String> segments = result.split('.');
+
+    setState(() {
+      if (double.parse(result) == 0 && _displayNum == "0") {
+        _displayResult = "";
+      } else if (segments[1] == "0") {
+        _displayResult = "= ${segments[0]}";
+      } else {
+        _displayResult = "= $result";
+      }
+    });
+  }
+
+  // The calculator
+  String _calculate() {
+    try {
+      String processedExp = _displayNum.replaceAll('X', '*').replaceAll('÷', '/');
+
+      final parser = GrammarParser();
+      final exp = parser.parse(processedExp);
+
+      final evaluator = RealEvaluator(ContextModel());
+      final result = evaluator.evaluate(exp);
+
+      return result.toString();
+    } catch (e) {
+      return "Error: Invalid expression.";
+    }
+  }
 
   @override
   Widget build(BuildContext context){
@@ -112,6 +189,30 @@ class _CalculatorPageState extends State<CalculatorPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+
+                // result
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.symmetric(horizontal: 30),
+
+                        child: Text(
+                          _displayResult,
+
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        )
+                      ),
+                    )
+                  ],
+                ),
+
+                // Operations
                 Row(
                   children: [
                     Expanded(
