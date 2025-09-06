@@ -4,18 +4,19 @@ This is my first ever flutter project built for getting famalier of
 Flutter framework. It is created using only what I know of flutter till
 now, so it may not follow Flutter conventions and best practices. Happy
 coding ; )
-
+ library
 ## Features
 
-- I has a AppBar which title changes depending on which page you are on.
-- Has a BottomNavigationBar for navigation.
+- It has a AppBar which title changes depending on which page you are on.
+- It has a BottomNavigationBar for navigation.
 - Contains four pages: Home, Calculator, About, Settings which are empty
   pages except the Calculator page.
 - The calculator page features a simple calculator allowing users to
   perform basic math like: Addigion, Subtraction, Multiplication, Division
-  (May add more operations later).
+  and Percentage operation - which does not work well because of the `double`
+  datatype's precision limitation. *(May add more operations later)*
 
-> ---
+> 
 > ***Note:** I thought of writing my own operation parser, but then realized
 > that it would be complex and time consuming. Since my current primary goal
 > is to learn Flutter, so I decided to use `math_expressions` library instead.
@@ -27,7 +28,6 @@ coding ; )
 > for that. And feel free to implement it yourself in a proper way(using proper
 > library for decimal point) if you want.*
 >
-> ---
 
 ## To get started with this project:
 
@@ -42,7 +42,7 @@ coding ; )
     # it will install math_expressions library
     flutter pub get
     ```
-3. Setup an amulator or connect to a physical device (I would assume you already have done it).
+3. Setup an amulator or connect to a physical device *(I would assume you already have done it)*.
 4. Then run the flutter app:
     ```bash
     flutter run
