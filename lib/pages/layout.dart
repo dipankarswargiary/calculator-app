@@ -1,5 +1,5 @@
 import 'package:calculator/pages/about_page.dart';
-import 'package:calculator/pages/calculator.dart';
+import 'package:calculator/pages/calculator/calculator_page.dart';
 import 'package:calculator/pages/home_page.dart';
 import 'package:calculator/pages/settings_page.dart';
 import 'package:flutter/material.dart';
