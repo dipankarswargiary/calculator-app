@@ -1,5 +1,5 @@
+import 'package:calculator/pages/calculator/calculator_logic.dart';
 import 'package:calculator/pages/calculator/widgets/calculator_button.dart';
-import 'package:math_expressions/math_expressions.dart';
 import 'package:flutter/material.dart';
 
 class CalculatorPage extends StatefulWidget {
@@ -20,164 +20,17 @@ class _CalculatorPageState extends State<CalculatorPage> {
     '',  '0', '.', '=',
   ];
 
-  String _displayNum = "0";
-  String _displayResult = "";
-  bool _decimalPointUsed = false;
+  final CalculatorLogic logic = CalculatorLogic();
 
-  bool isOperator(String text) {
-    if (text == 'AC' || text == 'C' || text == '%'
-      || text == '÷' || text == 'X' || text == '-'
-      || text == '+' || text == '=') {
-        
-      return true;
+  void onButtonPressed(String value) {
+    if (logic.isOperator(value)) {
+      logic.handleOperation(value);
     }
-    return false;
-  }
-
-  void _buttonPressed(String num) {
-    if (num == '') return;
-    
-    setState(() {
-      if (num == "." && (_decimalPointUsed || isOperator(_displayNum[(_displayNum.length - 1)]))) {
-        return;
-      } else if (_displayNum == "0" && num != ".") {
-        _displayNum = num;
-      } else {
-        _displayNum += num;
-      }
-
-      if (num == ".") {
-        _decimalPointUsed = true;
-      }
-
-      // calculate the result
-      if (num != ".") {
-        _showResult();
-      }
-    });
-  }
-
-  void _operatorPressed(String op) {
-    String last = _displayNum[(_displayNum.length - 1)];
-    if (isOperator(last)) return;
-
-    setState(() {
-      if (last == '.') {
-        _displayNum = _displayNum.substring(0, _displayNum.length - 1);
-      }
-
-      _displayNum += op;
-      _decimalPointUsed = false;
-    });
-  }
-
-  void _handleOperation(String op) {
-    switch (op) {
-      case "AC":
-        _allClearOp();
-        break;
-      case "C":
-        _deleteOp();
-        break;
-      case "=":
-        _equalOp();
-        break;
-      case "%":
-        _percentageOp();
-        break;
-      default:
-        _operatorPressed(op);
-    }
-  }
-
-  // Operations
-
-  void _allClearOp() {
-    setState(() {
-      _displayNum = "0";
-      _displayResult = "";
-      _decimalPointUsed = false;
-    });
-  }
-
-  void _deleteOp() {
-    int numLen = _displayNum.length;
-
-    setState(() {
-      if (_displayNum[(numLen - 1)] == ".") {
-        _decimalPointUsed = false;
-      }
-
-      if (numLen > 1) {
-        _displayNum = _displayNum.substring(0, numLen - 1);
-      } else {
-        _displayNum = "0";
-      }
-      
-      _showResult();
-    });
-  }
-
-  void _percentageOp() {
-    setState(() {
-      double num = double.parse(_displayNum);
-      num /= 100;
-      _displayNum = num.toString();
-    });
-    
-    _showResult();
-  }
-
-  void _equalOp() {
-    final String last = _displayNum[(_displayNum.length - 1)];
-    if (isOperator(last) || last == ".") {
-      _displayNum = _displayNum.substring(0, _displayNum.length - 1);
+    else {
+      logic.buttonPressed(value);
     }
 
-    final result = _calculate();
-    List<String> segments = result.split('.');
-    setState(() {
-      _displayResult = "";
-      if (double.parse(result) == 0 && _displayNum == "0") {
-        _displayNum = "0";
-      } else if (segments[1] == "0") {
-        _displayNum = segments[0];
-      } else {
-        _displayNum = result;
-      }
-    });
-  }
-
-  void _showResult() {
-    final String result = _calculate();
-    List<String> segments = result.split('.');
-
-    setState(() {
-      if (double.parse(result) == 0 && _displayNum == "0") {
-        _displayResult = "";
-      } else if (segments[1] == "0") {
-        _displayResult = "= ${segments[0]}";
-      } else {
-        _displayResult = "= $result";
-      }
-    });
-  }
-
-  // The calculator
-  String _calculate() {
-    try {
-      String processedExp = _displayNum.replaceAll('X', '*').replaceAll('÷', '/');
-
-      final parser = GrammarParser();
-      final exp = parser.parse(processedExp);
-
-      final evaluator = RealEvaluator(ContextModel());
-      final result = evaluator.evaluate(exp);
-
-      return result.toString();
-    } catch (e) {
-      return "Error: Invalid expression.";
-    }
+    setState(() {});
   }
 
   @override
@@ -198,7 +51,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                         margin: EdgeInsets.symmetric(horizontal: 30),
 
                         child: Text(
-                          _displayResult,
+                          logic.displayResult,
 
                           textAlign: TextAlign.end,
                           style: TextStyle(
@@ -229,7 +82,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                         ),
 
                         child: Text(
-                          _displayNum,
+                          logic.displayNum,
 
                           textAlign: TextAlign.end,
                           style: TextStyle(
@@ -266,13 +119,9 @@ class _CalculatorPageState extends State<CalculatorPage> {
               itemBuilder:(context, index) => CalculatorButton(
                 text: buttonSymbols[index],
                 onPressed: () {
-                  if (buttonSymbols[index] == '') return;
-
-                  return isOperator(buttonSymbols[index])
-                  ? _handleOperation(buttonSymbols[index])
-                  : _buttonPressed(buttonSymbols[index]);
+                  onButtonPressed(buttonSymbols[index]);
                 },
-                isOperator: isOperator(buttonSymbols[index]),
+                isOperator: logic.isOperator(buttonSymbols[index]),
                 isHighlighted: (buttonSymbols[index] == '=') ? true : false,
               ),
             ),

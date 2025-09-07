@@ -15,7 +15,7 @@ coding ; )
   perform basic math like: Addigion, Subtraction, Multiplication, Division
   (May add more operations later).
 
-> ---
+> 
 > ***Note:** I thought of writing my own operation parser, but then realized
 > that it would be complex and time consuming. Since my current primary goal
 > is to learn Flutter, so I decided to use `math_expressions` library instead.
@@ -25,9 +25,8 @@ coding ; )
 > and performing operations on decimal values, so it won't handle them very well.
 > It can handle properly upto one decimal point precision at best, so look out
 > for that. And feel free to implement it yourself in a proper way(using proper
-> library for decimal point) if you want.*
+> library for decimal point) if you want.* library
 >
-> ---
 
 ## To get started with this project:
 
